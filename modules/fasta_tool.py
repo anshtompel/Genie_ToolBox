@@ -1,9 +1,12 @@
+import os
+from typing import TextIO
+
 def count_gc_content(seq: str) -> float:
     """
     Counts GC content of input sequence reads.
     
     Input:
-    - seq (str): input sequence reads from FASTA file.
+    - seq (str): input sequence reads from FASTQ file.
     
     Output:
     The GC bases percentage (float) of input sequence (range 0-100).
@@ -14,10 +17,10 @@ def count_gc_content(seq: str) -> float:
 
 def filter_gc_bound(fasta_input: dict, gc_params: tuple) -> dict:
     """
-    Filters sequences in FASTA file by GC percentage. 
+    Filters sequences in FASTQ file by GC percentage. 
     
     Input:
-    - fasta_input (dict): FASTA file in dictionary format: key - read ID, value - tuple of sequence and quality.
+    - fasta_input (dict): FASTQ file in dictionary format: key - read ID, value - tuple of sequence and quality.
     - gc_params (tuple): range for filtration, accepts upper or upper/lower border. Both borders are included.
     
     Output:
@@ -34,7 +37,7 @@ def filter_gc_bound(fasta_input: dict, gc_params: tuple) -> dict:
 
 def filter_length_bounds(result_gc_cound: dict, len_bound_params: tuple) -> dict:
     """
-    Filters sequences in FASTA file by sequence length.
+    Filters sequences in FASTQ file by sequence length.
     
     Input:
     - result_gc_cound (dict): FASTA file in dictionary format after filter_gc_bound proccesing: 
@@ -58,7 +61,7 @@ def count_quality_score(seq: str) -> float:
     Counts mean quality score of input sequence based on the value of each symbol in ASCII table.
     
     Input:
-    - seq (str): quality score from FASTA file. 
+    - seq (str): quality score from FASTQ file. 
     
     Output:
     Mean quality score of input sequence (float).
@@ -73,10 +76,10 @@ def count_quality_score(seq: str) -> float:
 
 def filter_quality_threshold(result_len_bound: dict, quality_params: int) -> dict:
     """
-    Filters sequences in FASTA file by mean quality score.
+    Filters sequences in FASTQ file by mean quality score.
     
     Input:
-    - result_len_bound (dict): FASTA file in dictionary format after filter_length_bounds proccesing: 
+    - result_len_bound (dict): FASTQ file in dictionary format after filter_length_bounds proccesing: 
     key - read ID, value - tuple of sequence and quality.
     - quality_params (int): threshold value of reads quality in phred33 scale.
     
@@ -85,7 +88,7 @@ def filter_quality_threshold(result_len_bound: dict, quality_params: int) -> dic
     """
     filtered = {}
     for seq in result_len_bound:
-        ascii_quality = result_len_bound[seq][1]
+        ascii_quality = result_len_bound[seq][2]
         if count_quality_score(ascii_quality) >= quality_params:
             filtered[seq] = result_len_bound[seq][:]
         continue
@@ -107,7 +110,6 @@ def int_to_tuple(input_parameters) -> tuple:
     if isinstance(input_parameters, tuple):
         return input_parameters
     return (0, input_parameters)
-
 
 def run_fasta_filter(seqs: dict, gc_bounds = (0, 100), length_bounds = (0, 2**32), quality_threshold = 0) -> dict:
     """
