@@ -1,8 +1,8 @@
 import os
 from typing import TextIO
-from modules.fasta_tool import *
-from modules.dna_rna_tools import *
-from modules.protein_tools import *
+from modules.fastq_tool import filter_gc_bound, filter_length_bounds, filter_quality_threshold, int_to_tuple, fastq_to_dict, dict_to_fastq
+from modules.dna_rna_tools import reverse, complement, reverse_complement, transcribe
+from modules.protein_tools import count_protein_mass, count_trypsin_sites, count_seq_length, classify_aminoacids, check_unusual_aminoacids, count_charge,count_aliphatic_index
 
 COMPLEMENT_DNA = {'a': 't', 'A': 'T', 't': 'a', 'T': 'A',
                   'g': 'c', 'G': 'C', 'c': 'g', 'C': 'G'}
@@ -125,16 +125,12 @@ def run_fastq_filter(input_path = None, output_filename = None, gc_bounds = (0, 
     """
     if not input_path.endswith('.fastq'):
         raise ValueError('Incorrect input file extension, should be .fastq')
-    
     fastq_dictionary = fastq_to_dict(input_path)
     gc_params = int_to_tuple(gc_bounds)
     len_bound_params = int_to_tuple(length_bounds) 
-    
     result_gc_bound = filter_gc_bound(fastq_dictionary, gc_params)
     result_len_bound = filter_length_bounds(result_gc_bound, len_bound_params)
     filtered_result = filter_quality_threshold(result_len_bound, quality_threshold)
-    
     if output_filename is None:
-        output_filename = input_path
-        
+        output_filename = input_path     
     return dict_to_fastq(filtered_result, output_filename)
