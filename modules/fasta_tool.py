@@ -140,6 +140,28 @@ def fastq_to_dict(file: TextIO) -> dict:
                 continue
         return fastq_dict
 
+    
+def dict_to_fastq(fastq_dict: dict, output_filename: str) -> TextIO: 
+    """
+    Converts filtetred dictionary to FASTQ file. Dictionary has four strings: (1) - read ID (str), 
+    (2) sequence, commentary and quality (tuple of str). Every string is written sequentially. 
+    
+    Input:
+    - Dict(key - str; value - tuple(str)) - dictionary of filtered reads;
+    
+    Output:
+    .fastq file (textIO format): FASTQ file with filtered reads.
+    """
+    path = 'fastq_filtrator_resuls'
+    if not os.path.exists(path):
+        os.makedirs(path)
+    with open(os.path.join(path, output_filename), mode='w') as output:
+        for read_id in fastq_dict:
+            output.write(read_id + '\n')
+            for seq_com_quality in fastq_dict[read_id]:
+                output.write(seq_com_quality + '\n')
+    return output
+
 
 def run_fasta_filter(seqs: dict, gc_bounds = (0, 100), length_bounds = (0, 2**32), quality_threshold = 0) -> dict:
     """
