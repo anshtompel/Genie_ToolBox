@@ -115,7 +115,7 @@ def count_aliphatic_index(peptide: str) -> float:
     """
     aliphatic_aa_fraction = 0
     aliphatic_aa_fraction += peptide.count('A') + 3.9 * peptide.count('L') + 3.9 * peptide.count('I') +  2.9 * peptide.count('V')
-    aliph_index = (aliphatic_aa_count/count_seq_length(peptide))
+    aliph_index = (aliphatic_aa_fraction/count_seq_length(peptide))
     return aliph_index
 
 
