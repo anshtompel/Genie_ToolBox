@@ -105,7 +105,7 @@ def run_protein_tools(*peptides: str, operation = None) -> dict:
     return operation_result
 
 
-def run_fasta_filter(input_path = None, output_filename = None, gc_bounds = (0, 100), length_bounds = (0, 2**32), quality_threshold = 0) -> TextIO:
+def run_fastq_filter(input_path = None, output_filename = None, gc_bounds = (0, 100), length_bounds = (0, 2**32), quality_threshold = 0) -> TextIO:
     """
     Performs filter of input FASTQ file according to input parameters. 
     Input will be filtered by: 
