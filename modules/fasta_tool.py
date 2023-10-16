@@ -163,27 +163,36 @@ def dict_to_fastq(fastq_dict: dict, output_filename: str) -> TextIO:
     return output
 
 
-def run_fasta_filter(seqs: dict, gc_bounds = (0, 100), length_bounds = (0, 2**32), quality_threshold = 0) -> dict:
+def run_fasta_filter(input_path = None, output_filename = None, gc_bounds = (0, 100), length_bounds = (0, 2**32), quality_threshold = 0) -> TextIO:
     """
-    Performs filter of input FASTA file according to input parameters. 
+    Performs filter of input FASTQ file according to input parameters. 
     Input will be filtered by: 
         - GC content (gc_bounds);
         - reads length (length_bounds);
         - reads quality score (quality_threshold).
         
     Input:
-    - seqs (dict): FASTA file in dictionary format: key - read ID, value - tuple of sequence and quality.
+    - input_path (str): path to .fastq file; include 4 strings: 1 - read ID, 2 - sequence, 3 - comment, 4 - quality. Default - None.
+    - output_filename (str): name of output file, by default, it will be saved in the directory 'fastq_filtrator_resuls'. Default name will be name of input file.
     - gc_bounds (tuple or int): GC content filter parameters, it accepts lower and upper (tuple), or only upper threshold value (int). Default value (0, 100).
     - length_bounds (tuple or int): read length filter parameters, it accepts lower and upper (tuple), or only upper threshold value (int). Default value (0, 2**32).
     - quality_threshold (int): upper quality threshold in phred33 scale. Reads with average quality below the threshold are discarded. Default value - 0. 
     
     Output:
-    Returns FASTA in dictionary format, as input, only with filtered values which satisfied all input/default conditions.
-    Dictionary has a format like: key - read ID, value - tuple of sequence and quality.                           
+    Returns FASTQ only with filtered reads which satisfied all input/default conditions.
     """
+    if not input_path.endswith('.fastq'):
+        raise ValueError('Incorrect input file extension, should be .fastq')
+    
+    fastq_dictionary = fastq_to_dict(input_path)
     gc_params = int_to_tuple(gc_bounds)
     len_bound_params = int_to_tuple(length_bounds) 
-    result_gc_bound = filter_gc_bound(seqs, gc_params)
+    
+    result_gc_bound = filter_gc_bound(fastq_dictionary, gc_params)
     result_len_bound = filter_length_bounds(result_gc_bound, len_bound_params)
     filtered_result = filter_quality_threshold(result_len_bound, quality_threshold)
-    return filtered_result
+    
+    if output_filename is None:
+        output_filename = input_path
+        
+    return dict_to_fastq(filtered_result, output_filename)
