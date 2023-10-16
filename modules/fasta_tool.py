@@ -111,6 +111,36 @@ def int_to_tuple(input_parameters) -> tuple:
         return input_parameters
     return (0, input_parameters)
 
+
+def fastq_to_dict(file: TextIO) -> dict:
+    """
+    Converts input FASTQ file to dictionary. Dictionary has four strings: (1) - read ID (str), 
+    (2) sequence, commentary and quality (tuple of str). Read ID is identified as started with '@' string and include
+    one of this strings in the end: 'BH:ok', 'BH:failed' or 'BH:changed'. 
+    
+    Input:
+    - .fastq file (textIO format): FASTQ file;
+    
+    Output:
+    Dict(key - str; value - tuple(str)) - dictionary from input FASTQ file.
+    
+    """
+    with open (file) as fastq_file:
+        seq_com_quality = ()
+        fastq_dict = {}
+        for line in fastq_file:
+            line = line.strip()
+            if line.startswith('@') and ('BH:ok' in line or 'BH:failed' in line or 'BH:changed' in line):
+                read_id = line
+            else:
+                seq_com_quality += tuple([line])
+                if len(seq_com_quality) == 3:
+                    fastq_dict[read_id] = seq_com_quality
+                    seq_com_quality = ()
+                continue
+        return fastq_dict
+
+
 def run_fasta_filter(seqs: dict, gc_bounds = (0, 100), length_bounds = (0, 2**32), quality_threshold = 0) -> dict:
     """
     Performs filter of input FASTA file according to input parameters. 
