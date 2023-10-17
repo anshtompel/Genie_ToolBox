@@ -193,6 +193,6 @@ def run_fastq_filter(input_path = None, output_filename = None, gc_bounds = (0, 
     filtered_result = filter_quality_threshold(result_len_bound, quality_threshold)
     
     if output_filename is None:
-        output_filename = input_path
+        output_filename = os.path.basename(input_path)
         
     return dict_to_fastq(filtered_result, output_filename)
