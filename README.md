@@ -4,6 +4,8 @@
 
 ![GitHub Image](/genie.png)
 <p align="center">
+<img width="100%" src="/genie.png">
+</p>
 
 
 ...you have three wishes and here they are!
