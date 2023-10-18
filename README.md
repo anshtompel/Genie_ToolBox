@@ -2,9 +2,8 @@
 > This README describes multitool for analysis DNA, peptide and FASTQ files.
 
 
-![GitHub Image](/genie.png)
 <p align="center">
-<img width="100%" src="/genie.png">
+<img width="40%" src="/genie.png">
 </p>
 
 
