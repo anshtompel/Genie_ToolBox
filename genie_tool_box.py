@@ -10,12 +10,6 @@ COMPLEMENT_DNA = {'a': 't', 'A': 'T', 't': 'a', 'T': 'A',
 COMPLEMENT_RNA = {'a': 'u', 'A': 'U', 'u': 'a', 'U': 'A',
                   'g': 'c', 'G': 'C', 'c': 'g', 'C': 'G'}
 
-DNA_RNA_OPERATIONS = {
-                'reverse': reverse, 
-                'complement': complement, 
-                'reverse_complement': reverse_complement, 
-                'transcribe': transcribe
-}
 
 AA_GROUPS = {'Nonpolar': ['G', 'A', 'V', 'I', 'L', 'P'],
              'Polar uncharged': ['S', 'T', 'C', 'M', 'N', 'Q'],
@@ -35,6 +29,13 @@ AMINO_ACIDS_MASSES = {
     'T': 101.1, 'C': 103.1, 'L': 113.2, 'I': 113.2, 'N': 114.1,
     'D': 115.1, 'Q': 128.1, 'K': 128.2, 'E': 129.1, 'M': 131.2,
     'H': 137.1, 'F': 147.2, 'R': 156.2, 'Y': 163.2, 'W': 186.2    
+}
+
+DNA_RNA_OPERATIONS = {
+                'reverse': reverse, 
+                'complement': complement, 
+                'reverse_complement': reverse_complement, 
+                'transcribe': transcribe
 }
 
 OPERATIONS = {'count_protein_mass':count_protein_mass,
