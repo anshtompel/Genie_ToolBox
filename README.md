@@ -3,7 +3,7 @@
 
 
 <p align="center">
-<img width="40%" src="/genie.png">
+<img width="40%" src="/images/genie.png">
 </p>
 
 
