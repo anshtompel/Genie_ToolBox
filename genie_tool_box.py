@@ -1,35 +1,8 @@
 import os
 from typing import TextIO, Optional, Union
-from modules.fastq_tool import check_gc, check_lengths, check_quality, int_to_tuple, fastq_to_dict, dict_to_fastq
+from modules.fastq_tool import int_to_tuple, fastq_to_dict, check_gc, check_length, check_quality, dict_to_fastq
 from modules.dna_rna_tools import reverse, complement, reverse_complement, transcribe
-from modules.protein_tools import count_protein_mass, count_trypsin_sites, count_seq_length, classify_aminoacids, check_unusual_aminoacids, count_charge,count_aliphatic_index
-
-COMPLEMENT_DNA = {'a': 't', 'A': 'T', 't': 'a', 'T': 'A',
-                  'g': 'c', 'G': 'C', 'c': 'g', 'C': 'G'}
-
-COMPLEMENT_RNA = {'a': 'u', 'A': 'U', 'u': 'a', 'U': 'A',
-                  'g': 'c', 'G': 'C', 'c': 'g', 'C': 'G'}
-
-
-AA_GROUPS = {'Nonpolar': ['G', 'A', 'V', 'I', 'L', 'P'],
-             'Polar uncharged': ['S', 'T', 'C', 'M', 'N', 'Q'],
-             'Aromatic': ['F', 'W', 'Y'],
-             'Polar with negative charge': ['D', 'E'],
-             'Polar with positive charge': ['K', 'R', 'H']
-                }
-
-AMINOACIDS = {'G', 'A', 'V', 'I', 'L', 'P',
-              'S', 'T', 'C', 'M', 'N', 'Q', 
-              'F', 'W', 'Y', 'D', 'E', 'K', 
-              'R', 'H'
-                     }
-
-AMINO_ACIDS_MASSES = {
-    'G': 57.05, 'A': 71.08, 'S': 87.08, 'P': 97.12, 'V': 99.13,
-    'T': 101.1, 'C': 103.1, 'L': 113.2, 'I': 113.2, 'N': 114.1,
-    'D': 115.1, 'Q': 128.1, 'K': 128.2, 'E': 129.1, 'M': 131.2,
-    'H': 137.1, 'F': 147.2, 'R': 156.2, 'Y': 163.2, 'W': 186.2    
-}
+from modules.protein_tools import count_protein_mass, count_trypsin_sites, count_seq_length, classify_aminoacids, check_unusual_aminoacids, count_charge,count_aliphatic_index, is_protein
 
 DNA_RNA_OPERATIONS = {
                 'reverse': reverse, 
