@@ -1,8 +1,11 @@
 # Genie_ToolBox
 > This README describes multitool for analysis DNA, peptide and FASTQ files.
 
-...you have three wishes and here they are!
+
 ![GitHub Image](/genie.png)
+
+
+...you have three wishes and here they are!
 Genie ToolBox is an instrument for analysis and manipulation with DNA, protein and FASTQ files.
 
 
