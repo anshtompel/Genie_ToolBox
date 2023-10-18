@@ -130,7 +130,7 @@ run_protein_tools(sequence1, sequence2, sequence3, operation='count_seq_length')
 ```
 
 #### For `fastq_tool`:
-Examples could be run using ~*EXAMPLE_FASTQ.fastq*~ located near main script.
+Examples could be run using *EXAMPLE_FASTQ.fastq* located near main script.
 
 ```python
 run_fastq_filter('EXAMPLE_FASTQ.fastq') # with default paraments
