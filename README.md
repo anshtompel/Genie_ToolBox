@@ -3,6 +3,7 @@
 
 
 ![GitHub Image](/genie.png)
+<p align="center">
 
 
 ...you have three wishes and here they are!
