@@ -1,6 +1,6 @@
 import os
-from typing import TextIO
-from modules.fastq_tool import filter_gc_bound, filter_length_bounds, filter_quality_threshold, int_to_tuple, fastq_to_dict, dict_to_fastq
+from typing import TextIO, Optional, Union
+from modules.fastq_tool import check_gc, check_lengths, check_quality, int_to_tuple, fastq_to_dict, dict_to_fastq
 from modules.dna_rna_tools import reverse, complement, reverse_complement, transcribe
 from modules.protein_tools import count_protein_mass, count_trypsin_sites, count_seq_length, classify_aminoacids, check_unusual_aminoacids, count_charge,count_aliphatic_index
 
@@ -105,7 +105,7 @@ def run_protein_tools(*peptides: str, operation = None) -> dict:
     return operation_result
 
 
-def run_fastq_filter(input_path = None, output_filename = None, gc_bounds = (0, 100), length_bounds = (0, 2**32), quality_threshold = 0) -> TextIO:
+def run_fastq_filter(input_path: Optional[str] = None, output_filename: Optional[str] = None, gc_bounds: Union[int, tuple] = (0, 100), length_bounds: Union[int, tuple] = (0, 2**32), quality_threshold: int = 0) -> TextIO:
     """
     Performs filter of input FASTQ file according to input parameters. 
     Input will be filtered by: 
@@ -124,13 +124,16 @@ def run_fastq_filter(input_path = None, output_filename = None, gc_bounds = (0, 
     Returns FASTQ only with filtered reads which satisfied all input/default conditions.
     """
     if not input_path.endswith('.fastq'):
-        raise ValueError('Incorrect input file extension, should be .fastq')
-    fastq_dictionary = fastq_to_dict(input_path)
-    gc_params = int_to_tuple(gc_bounds)
-    len_bound_params = int_to_tuple(length_bounds) 
-    result_gc_bound = filter_gc_bound(fastq_dictionary, gc_params)
-    result_len_bound = filter_length_bounds(result_gc_bound, len_bound_params)
-    filtered_result = filter_quality_threshold(result_len_bound, quality_threshold)
+        raise ValueError('Incorrect input file extension, should be .fastq')           
     if output_filename is None:
-        output_filename = input_path     
-    return dict_to_fastq(filtered_result, output_filename)
+        output_filename = os.path.basename(input_path)        
+    gc_params = int_to_tuple(gc_bounds)
+    len_bound_params = int_to_tuple(length_bounds)       
+    fastq_dictionary = fastq_to_dict(input_path)
+    filtered_fastq = {}   
+    for read in fastq_dictionary:
+        read_sequence = fastq_dictionary[read][0]
+        read_quality = fastq_dictionary[read][2]
+        if check_gc(read_sequence, gc_params) and check_length(read_sequence, len_bound_params) and check_quality(read_quality, quality_threshold):
+            filtered_fastq[read] = fastq_dictionary[read][:]        
+    return dict_to_fastq(filtered_fastq, output_filename)
