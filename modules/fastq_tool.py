@@ -45,7 +45,7 @@ def check_length(fastq_read: str, len_bound_params: tuple) -> bool:
     len_of_seq = len(fastq_read)
     if len_bound_params[0] < len_of_seq < len_bound_params[1]:
         return True
-    
+
 
 def count_quality_score(seq: str) -> float:
     """
@@ -65,25 +65,19 @@ def count_quality_score(seq: str) -> float:
     return mean_score     
  
 
-def filter_quality_threshold(result_len_bound: dict, quality_params: int) -> dict:
+def check_quality(fastq_quality: str, quality_params: int) -> bool:
     """
     Filters sequences in FASTQ file by mean quality score.
     
     Input:
-    - result_len_bound (dict): FASTQ file in dictionary format after filter_length_bounds proccesing: 
-    key - read ID, value - tuple of sequence and quality.
+    - fastq_quality (str): FASTQ read quality
     - quality_params (int): threshold value of reads quality in phred33 scale.
     
     Output:
-    Returns input dictionary only with filtered values.
+    Returns boolean value is this read satisfied the criteria.
     """
-    filtered = {}
-    for seq in result_len_bound:
-        ascii_quality = result_len_bound[seq][2]
-        if count_quality_score(ascii_quality) >= quality_params:
-            filtered[seq] = result_len_bound[seq][:]
-        continue
-    return filtered
+    if count_quality_score(fastq_quality) >= quality_params:
+        return True
 
 
 def int_to_tuple(input_parameters) -> tuple:
@@ -103,7 +97,7 @@ def int_to_tuple(input_parameters) -> tuple:
     return (0, input_parameters)
 
 
-def fastq_to_dict(file: TextIO) -> dict:
+def fastq_to_dict(file: str) -> dict:
     """
     Converts input FASTQ file to dictionary. Dictionary has four strings: (1) - read ID (str), 
     (2) sequence, commentary and quality (tuple of str). Read ID is identified as started with '@' string and include
@@ -117,18 +111,14 @@ def fastq_to_dict(file: TextIO) -> dict:
     
     """
     with open (file) as fastq_file:
-        seq_com_quality = ()
-        fastq_dict = {}
-        for line in fastq_file:
-            line = line.strip()
-            if line.startswith('@') and ('BH:ok' in line or 'BH:failed' in line or 'BH:changed' in line):
-                read_id = line
-            else:
-                seq_com_quality += tuple([line])
-                if len(seq_com_quality) == 3:
-                    fastq_dict[read_id] = seq_com_quality
-                    seq_com_quality = ()
-                continue
+        sequence, comment, quality = [], [], []
+        fastq_keys = []
+        content = [line.strip() for line in fastq_file]
+        fastq_keys.extend(content[::4])
+        sequence.extend(content[1::4])
+        comment.extend(content[2::4])
+        quality.extend(content[3::4])
+        fastq_dict = dict(zip(fastq_keys, zip(sequence, comment, quality)))
         return fastq_dict
 
     
