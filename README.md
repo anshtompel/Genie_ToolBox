@@ -1,8 +1,8 @@
 # Genie_ToolBox
-> This README describes multitool for analysis DNA, peptide and FASTA sequences.
+> This README describes multitool for analysis DNA, peptide and FASTQ files.
 
 ...you have three wishes and here they are!
-Genie ToolBox is an instrument for analysis and manipulation with DNA, protein and FASTA sequences.
+Genie ToolBox is an instrument for analysis and manipulation with DNA, protein and FASTQ files.
 
 ## Content
 
@@ -10,28 +10,28 @@ Genie ToolBox is an instrument for analysis and manipulation with DNA, protein a
 2. [Description of operations](#description)
     * [DNA_RNA_TOOLS](#dnarnatools)
     * [PROTEIN_TOOLS](#proteintools)
-    * [FASTA_TOOL](#fastatool)
+    * [FASTQ_TOOL](#fastqtool)
 3. [Usage](#usage)
     * [for `dna_rna_tools`](#dnarnatools_usage)
     * [for `protein_tools`](#proteintools_usage)
-    * [for `fasta_tool`](#fastatool_usage)
-4. [Contancs](#contacts)
+    * [for `fastq_tool`](#fastqtool_usage)
+4. [Contacts](#contacts)
 
 ## 1.Installation <a name="installation"></a>
 
 1. Clone repo to your local machine using SSH:
 ``` bash
-git@github.com:anshtompel/Genie_ToolBox.git
+git clone git@github.com:anshtompel/Genie_ToolBox.git
 ```
 or HTTPS:
 ``` bash
-https://github.com/anshtompel/Genie_ToolBox.git
+git clone https://github.com/anshtompel/Genie_ToolBox.git
 ```
 
 2. Launch `genie_tool_box.py` script and call one of three available functions:
    - `run_dna_rna_tools` - performs transfornations with DNA or RNA sequences according to the complementary base pairing rule;
    -  `run_protein_tools` - counts different phisical and biological properties of protein/peptide;
-   -  `run_fasta_filter` - filters FASTA read sequences by input parameters.
+   -  `run_fastq_filter` - filters reads in FASTQ file by input parameters.
 
 ## 2.Description of operations <a name="description"></a>
 
@@ -76,7 +76,7 @@ Also this function check the availabilaty of the procedure and raise the ValueEr
 2. Be careful to work only with the sequences that contain aminoacids that coded with one letter. If your sequense is "SerMetAlaGly", **Protein_tools** reads it as "SERMETALAGLY".
 3. The list of available functions is available in section "Options". If you see `ValueError` *"This procedure is not available. Please choose another procedure."*, probably your spelling of the name of function is incorrect. Please check the name of chosen prosedure and make sure that it is available in the **Protein_Tools**.
 
-### FASTA_TOOL <a name="fastatool"></a>
+### FASTQ_TOOL <a name="fastqtool"></a>
 Performs filter of input FASTA file according to input parameters.
 Input will be filtered by:
 - GC content (`gc_bounds`);
@@ -84,14 +84,14 @@ Input will be filtered by:
 - reads quality score (`quality_threshold`).
 
 Input:
-- `seqs` (dict): FASTA file in dictionary format: key - read ID, value - tuple of sequence and quality.
-- `gc_bounds` (tuple or int): GC content filter parameters, it accepts lower and upper (tuple), or only upper threshold value (int). Default value (0, 100).
-- `length_bounds` (tuple or int): read length filter parameters, it accepts lower and upper (tuple), or only upper threshold value (int). Default value (0, 2**32).
-- `quality_threshold` (int): upper quality threshold in phred33 scale. Reads with average quality below the threshold are discarded. Default value - 0.
+- `input_path` (str): name of FASTQ file. Pay attention that file should be located in tool working directory. Default = *None*.
+- `output_filename` (str): name of output FASTQ file with filtered reads. If the file name is not assigned, input file name will be used. Default = *None*.
+- `gc_bounds` (tuple or int): GC content filter parameters, it accepts lower and upper (tuple), or only upper threshold value (int). Default value *(0, 100)*.
+- `length_bounds` (tuple or int): read length filter parameters, it accepts lower and upper (tuple), or only upper threshold value (int). Default value *(0, 2**32)*.
+- `quality_threshold` (int): upper quality threshold in phred33 scale. Reads with average quality below the threshold are discarded. Default value - *0*.
 
 Output:
-Returns FASTA in dictionary format, as input, only with filtered values which satisfied all input/default conditions.
-Dictionary has a format like: key - read ID, value - tuple of sequence and quality.
+Returns FASTQ file as an original input file, but only with reads, which satisfied all input/default conditions.
 
 ## 3. Usage <a name="usage"></a>
 #### For `dna_rna_tools`:
@@ -129,17 +129,18 @@ sequence3 = 'CWVGYTAIRFPHQEMQQNTRFNKP'
 run_protein_tools(sequence1, sequence2, sequence3, operation='count_seq_length') # {'CVWGWAMGEAC': 11, 'PNPIKINISAYAKTWYQNGPIGRCC': 25, 'CWVGYTAIRFPHQEMQQNTRFNKP': 24}
 ```
 
-#### For `fasta_tool`:
+#### For `fastq_tool`:
+Examples could be run using ~*EXAMPLE_FASTQ.fastq*~ located near main script.
 
 ```python
-run_fasta_filter(EXAMPLE_FASTQ) # with default paraments
-run_fasta_filter(EXAMPLE_FASTQ, gc_bounds=50) # with only one paramenter, int as upper border
-run_fasta_filter(EXAMPLE_FASTQ, gc_bounds=50, length_bounds=100, quality_threshold=30) # with all input paramenters, int as upper border
-run_fasta_filter(EXAMPLE_FASTQ, gc_bounds=(30, 40), length_bounds=(60, 1000), quality_threshold=30) # with only one paramenter, tuple - lower and upper border
+run_fastq_filter('EXAMPLE_FASTQ.fastq') # with default paraments
+run_fastq_filter('EXAMPLE_FASTQ.fastq', gc_bounds=50) # with only one paramenter, int as upper border
+run_fastq_filter('EXAMPLE_FASTQ.fastq', gc_bounds=50, length_bounds=100, quality_threshold=30) # with all input paramenters, int as upper border
+run_fastq_filter('EXAMPLE_FASTQ.fastq', gc_bounds=(30, 40), length_bounds=(60, 1000), quality_threshold=30) # with only one paramenter, tuple - lower and upper border
 ```
 
 ## 4. Contacts <a name="contacts"></a>
 
-- [Anastasia Shtompel](https://github.com/anshtompel) (Telegram: @Aenye): options `count_protein_mass`, `count_aliphatic_index`, `count_trypsin_sites`, modules: `dna_rna_tools`, `fasta_tools`.
-- [Elizaveta Chevokina](https://github.com/e-chevokina) (Telegram: @lzchv): options `count_seq_length`, `classify_aminoacids`, `check_unusual_aminoacids`, `count_charge`.
+- [Anastasia Shtompel](https://github.com/anshtompel) (Telegram: @Aenye): options from module _protein_tools_: `count_protein_mass`, `count_aliphatic_index`, `count_trypsin_sites`, modules: `dna_rna_tools`, `fastq_tools`.
+- [Elizaveta Chevokina](https://github.com/e-chevokina) (Telegram: @lzchv): options from module _protein_tools_: `count_seq_length`, `classify_aminoacids`, `check_unusual_aminoacids`, `count_charge`.
 
