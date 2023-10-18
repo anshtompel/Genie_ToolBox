@@ -1,5 +1,5 @@
 import os
-from typing import TextIO
+from typing import TextIO, Optional, Union
 
 def count_gc_content(seq: str) -> float:
     """
@@ -15,46 +15,37 @@ def count_gc_content(seq: str) -> float:
     return gc_content
 
 
-def filter_gc_bound(fasta_input: dict, gc_params: tuple) -> dict:
+def check_gc(fastq_read: str, gc_params: tuple) -> bool:
     """
     Filters sequences in FASTQ file by GC percentage. 
     
     Input:
-    - fasta_input (dict): FASTQ file in dictionary format: key - read ID, value - tuple of sequence and quality.
+    - fastq_read (str): FASTQ sequence read.
     - gc_params (tuple): range for filtration, accepts upper or upper/lower border. Both borders are included.
     
     Output:
-    Returns input dictionary only with filtered values.
+    Returns boolean value is this read satisfied the criteria.
     """
-    filtered = {}
-    for seq in fasta_input:
-        gc_result = count_gc_content(fasta_input[seq][0])
-        if gc_params[0] < gc_result < gc_params[1]:
-            filtered[seq] = fasta_input[seq][:]
-        continue
-    return filtered
+    gc_result = count_gc_content(fastq_read)
+    if gc_params[0] < gc_result < gc_params[1]:
+        return True
 
 
-def filter_length_bounds(result_gc_cound: dict, len_bound_params: tuple) -> dict:
+def check_length(fastq_read: str, len_bound_params: tuple) -> bool:
     """
     Filters sequences in FASTQ file by sequence length.
     
     Input:
-    - result_gc_cound (dict): FASTA file in dictionary format after filter_gc_bound proccesing: 
-    key - read ID, value - tuple of sequence and quality.
+    - fastq_read (str): FASTQ sequence read.
     - len_bound_params (tuple): range for filtration, accepts upper or upper/lower border. Both borders are included.
     
     Output:
-    Returns input dictionary only with filtered values.
+    Returns boolean value is this read satisfied the criteria.
     """
-    filtered = {}
-    for seq in result_gc_cound:
-        len_of_seq = len(result_gc_cound[seq][0])
-        if len_bound_params[0] < len_of_seq < len_bound_params[1]:
-            filtered[seq] = result_gc_cound[seq][:]
-        continue
-    return filtered
-
+    len_of_seq = len(fastq_read)
+    if len_bound_params[0] < len_of_seq < len_bound_params[1]:
+        return True
+    
 
 def count_quality_score(seq: str) -> float:
     """
