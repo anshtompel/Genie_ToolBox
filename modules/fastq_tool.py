@@ -163,17 +163,21 @@ def run_fastq_filter(input_path = None, output_filename = None, gc_bounds = (0, 
     Returns FASTQ only with filtered reads which satisfied all input/default conditions.
     """
     if not input_path.endswith('.fastq'):
-        raise ValueError('Incorrect input file extension, should be .fastq')
-    
-    fastq_dictionary = fastq_to_dict(input_path)
-    gc_params = int_to_tuple(gc_bounds)
-    len_bound_params = int_to_tuple(length_bounds) 
-    
-    result_gc_bound = filter_gc_bound(fastq_dictionary, gc_params)
-    result_len_bound = filter_length_bounds(result_gc_bound, len_bound_params)
-    filtered_result = filter_quality_threshold(result_len_bound, quality_threshold)
-    
+        raise ValueError('Incorrect input file extension, should be .fastq')    
+        
     if output_filename is None:
         output_filename = os.path.basename(input_path)
         
-    return dict_to_fastq(filtered_result, output_filename)
+    gc_params = int_to_tuple(gc_bounds)
+    len_bound_params = int_to_tuple(length_bounds) 
+      
+    fastq_dictionary = fastq_to_dict(input_path)
+    filtered_fastq = {}
+    
+    for read in fastq_dictionary:
+        read_sequence = fastq_dictionary[read][0]
+        read_quality = fastq_dictionary[read][2]
+        if check_gc(read_sequence, gc_params) and check_length(read_sequence, len_bound_params) and check_quality(read_quality, quality_threshold):
+            filtered_fastq[read] = fastq_dictionary[read][:]
+        
+    return dict_to_fastq(filtered_fastq, output_filename)
