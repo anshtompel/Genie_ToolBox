@@ -1,6 +1,6 @@
 # BIO_FILES_PROCESSOR
 
-> This README describes tool for manipulation with bioformats such as FASTA, GBK and BLAST results.
+> This README describes tool for manipulation with bioformats such as FASTA, GBK and files containing BLAST results.
 
 ## 1.Installation 
 
