@@ -102,3 +102,18 @@ def change_fasta_start_pos(input_fasta: str, shift: int, output_fasta: Optional[
     with open(output_fasta, mode = 'w') as output:
         output.write(sequence_ID + '\n')
         output.write(shifted_seq + '\n')
+        
+
+def parse_blast_output(input_file: str, output_file: Optional[str] = None) -> None:
+    if output_fasta is None:
+        output_fasta = 'sorted_blast_result.txt' 
+    with open(input_file) as blast_txt:
+        output = []
+        blast = blast_txt.readlines()
+        for i in range(len(blast)):
+            if 'Description' in blast[i]:
+                output.append(blast[i+1]) 
+    sort_output = sorted(output)
+    with open (output_file, mode = 'w') as output:
+        for line in sort_output:
+            output.write(line + '\n')
