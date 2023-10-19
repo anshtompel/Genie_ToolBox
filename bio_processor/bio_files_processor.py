@@ -90,3 +90,15 @@ def select_genes_from_gbk_to_fasta(input_gbk: str, genes: str, output_fasta: str
     output_list = find_range_genes(filter_gene_list, gene_of_interest_list, genes, n_before, n_after)
     write_to_fasta(output_list, output_fasta)
     return f'Fasta file was written in {os.path.join(os. getcwd(), output_fasta)}.'
+
+
+def change_fasta_start_pos(input_fasta: str, shift: int, output_fasta: Optional[str] = None) -> None:
+    if output_fasta is None:
+        output_fasta = 'shifted_fasta.fasta' 
+    with open(input_fasta) as fasta_sequence:
+        sequence_ID = fasta_sequence.readline().strip()
+        sequence = fasta_sequence.readline().strip()
+        shifted_seq = sequence[shift:]+sequence[:shift]
+    with open(output_fasta, mode = 'w') as output:
+        output.write(sequence_ID + '\n')
+        output.write(shifted_seq + '\n')
