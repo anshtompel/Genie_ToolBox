@@ -1,16 +1,9 @@
 import os
+import re
 from typing import TextIO, Optional, Union
-from modules.dna_rna_tools import reverse, complement, reverse_complement, transcribe
-from modules.protein_tools import count_protein_mass, count_trypsin_sites, count_seq_length, classify_aminoacids, check_unusual_aminoacids, count_charge,count_aliphatic_index, is_protein
+from abc import ABC, abstractmethod
 from Bio import SeqIO, SeqUtils
-
-
-DNA_RNA_OPERATIONS = {
-                'reverse': reverse, 
-                'complement': complement, 
-                'reverse_complement': reverse_complement, 
-                'transcribe': transcribe
-}
+from modules.protein_tools import count_protein_mass, count_trypsin_sites, count_seq_length, classify_aminoacids, check_unusual_aminoacids, count_charge,count_aliphatic_index, is_protein
 
 OPERATIONS = {'count_protein_mass':count_protein_mass,
              'count_aliphatic_index': count_aliphatic_index,
@@ -21,27 +14,103 @@ OPERATIONS = {'count_protein_mass':count_protein_mass,
              'count_charge': count_charge}
 
 
-def run_dna_rna_tools(*strings: str) -> list:
+class BiologicalSequence(ABC):
+    @abstractmethod
+    def __len__():
+        pass
+
+    def __getitem__():
+        pass
+
+    def __str__():
+        pass
+
+    def check_sequence():
+        pass
+
+class NucleicAcidSequence(BiologicalSequence):
+    """Proccising nucleic acid sequences.
+    This class is parental for DNASequence and RNASequence classes.
     """
-    Procceds DNA and RNA sequences according to the complementary base pairing rule. 
-    Function accepts one or arbitary arguments - nucleic acid sequences, 
-    and returns string if one argument was entered or list for two and more arguments. 
-    The last argument is always operation name.
+    def __init__(self, seq) -> None:
+        self.seq = seq
+
+    def check_sequence(self):
+        """
+        Checkes the correctnessis of input string (DNA or RNA).
+        """
+        for nucleotide in self.seq:
+            if not nucleotide in type(self).complement_rule:
+                raise ValueError (f'Incorrect nucleotide in {self.seq}')
+        return True
+
+    def complement(self):
+        """
+        Create complement sequences of RNA or DNA acoording to the complementary base pairing rule. 
+        """
+        if self.check_sequence():
+            complement_sequence = ''
+            for nucleotide in self.seq:
+                if nucleotide in type(self).complement_rule:
+                    complement_sequence += type(self).complement_rule[nucleotide]
+            return type(self)(complement_sequence)
+
+    def gc_content(self):
+        return (sum(1 for _ in re.finditer(r'[GCgc]', self.seq)))/self.__len__()
     
-    Input:
-    *strings list[str]: list of DNA or RNA sequences.
-    The last argument is one of the followed operations:
-    
-            - reverse: creates reverse sequence(s) of RNA or DNA.
-            - complement: create complement sequence(s) of RNA or DNA. 
-            - reverse_complement: Create reversed complement sequence(s) of RNA or DNA. 
-            - transcribe: create transcribed sequence(s) of DNA.
-            
-    Function returns sequences in the same letter case as input.
-    If invalid sequence is entered, function returns empty list.
+    def __len__(self):
+        return len(self.seq)
+
+    def __getitem__(self, key):
+        return self.seq[key]
+
+    def __str__(self):
+        return self.seq
+
+class DNASequence(NucleicAcidSequence):
     """
-    sequences, operation  = strings[:-1], strings[-1]
-    return DNA_RNA_OPERATIONS[operation](*sequences)
+    Procissing DNA sequences.
+    Argumemt: seq (str) - DNA sequence, letters case do not matter.
+    -Example nucl_seq = DNASequence('ATGCGC' OR 'ATgCgc' OR 'atgcgc).
+
+    Valid operations:
+    - transcribe - return transcibed sequence of DNA coding strand;
+    - complement - return complementary sequence according to complementary rule
+    - check sequence - is input sequence correct
+    - gc_content - return percent of GC in sequence
+    """
+    complement_rule = {'a': 't', 'A': 'T', 't': 'a', 'T': 'A',
+                       'g': 'c', 'G': 'C', 'c': 'g', 'C': 'G'}
+    
+    def __init__(self, seq: str) -> None:
+        super().__init__(seq = seq)
+
+    def transcribe(self):
+        """
+        Return transcribed sequence of DNA acoording to the complementary base pairing rule.  
+        Function can procced only DNA seqences.
+        """
+        transcribed_sequence = ''
+        transcribed_sequence = self.seq.replace('t', 'u').replace('T', 'U')
+        return type(self)(transcribed_sequence)
+
+class RNASequence(NucleicAcidSequence):
+    """
+    Procissing DNA sequences.
+    Argumemt: seq (str) - RNA sequence, letters case do not matter.
+    -Example nucl_seq = RNASequence('AUGCGC' OR 'AUgCgc' OR 'augcgc).
+
+    Valid operations:
+    - complement - return complementary sequence according to complementary rule
+    - check sequence - is input sequence correct
+    - gc_content - return percent of GC in sequence
+    """
+    complement_rule = {'a': 'u', 'A': 'U', 'u': 'a', 'U': 'A',
+                       'g': 'c', 'G': 'C', 'c': 'g', 'C': 'G'}
+    
+    def __init__(self, seq) -> None:
+        super().__init__(seq = seq)
+
 
 
 def run_protein_tools(*peptides: str, operation = None) -> dict:
@@ -78,6 +147,7 @@ def run_protein_tools(*peptides: str, operation = None) -> dict:
             else:
                 raise ValueError("This procedure is not available. Please choose another procedure.")
     return operation_result
+
 
 
 #FASTQ Filtraror with BIOPYTHON utilities
