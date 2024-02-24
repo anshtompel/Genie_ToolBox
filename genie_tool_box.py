@@ -1,8 +1,9 @@
 import os
 from typing import TextIO, Optional, Union
-from modules.fastq_tool import int_to_tuple, fastq_to_dict, check_gc, check_length, check_quality, dict_to_fastq
 from modules.dna_rna_tools import reverse, complement, reverse_complement, transcribe
 from modules.protein_tools import count_protein_mass, count_trypsin_sites, count_seq_length, classify_aminoacids, check_unusual_aminoacids, count_charge,count_aliphatic_index, is_protein
+from Bio import SeqIO, SeqUtils
+
 
 DNA_RNA_OPERATIONS = {
                 'reverse': reverse, 
@@ -79,6 +80,73 @@ def run_protein_tools(*peptides: str, operation = None) -> dict:
     return operation_result
 
 
+#FASTQ Filtraror with BIOPYTHON utilities
+
+def check_gc(fastq_read: str, gc_params: tuple) -> bool:
+    """
+    Filters sequences in FASTQ file by GC percentage. 
+    
+    Input:
+    - fastq_read (str): FASTQ sequence read.
+    - gc_params (tuple): range for filtration, accepts upper or upper/lower border. Both borders are included.
+    
+    Output:
+    Returns boolean value is this read satisfied the criteria.
+    """
+    gc_result = SeqUtils.GC123(fastq_read)[0]
+    if gc_params[0] < gc_result < gc_params[1]:
+        return True
+
+
+def check_length(fastq_read: str, len_bound_params: tuple) -> bool:
+    """
+    Filters sequences in FASTQ file by sequence length.
+    
+    Input:
+    - fastq_read (str): FASTQ sequence read.
+    - len_bound_params (tuple): range for filtration, accepts upper or upper/lower border. Both borders are included.
+    
+    Output:
+    Returns boolean value is this read satisfied the criteria.
+    """
+    len_of_seq = len(fastq_read)
+    if len_bound_params[0] < len_of_seq < len_bound_params[1]:
+        return True
+
+
+def check_quality(fastq_quality: str, quality_params: int) -> bool:
+    """
+    Filters sequences in FASTQ file by mean quality score.
+    
+    Input:
+    - fastq_quality (str): FASTQ read quality
+    - quality_params (int): threshold value of reads quality in phred33 scale.
+    
+    Output:
+    Returns boolean value is this read satisfied the criteria.
+    """ 
+    mean_quality = sum(fastq_quality.letter_annotations["phred_quality"])/len(fastq_quality.seq)
+    if mean_quality >= quality_params:
+        return True
+
+
+def int_to_tuple(input_parameters) -> tuple:
+    """
+    Converts input parameters to tuple format.
+    If input is already a tuple, it will be return without changes.
+    If input parameter is int (only upper threshold is entered), function will return a tuple like (0, 'input').
+    
+    Input:
+    - input_parameters (tuple or int).
+    
+    Output:
+    Lower and upper threshold for functions in tuple format.
+    """
+    if isinstance(input_parameters, tuple):
+        return input_parameters
+    return (0, input_parameters)
+
+
 def run_fastq_filter(input_path: Optional[str] = None, output_filename: Optional[str] = None, gc_bounds: Union[int, tuple] = (0, 100), length_bounds: Union[int, tuple] = (0, 2**32), quality_threshold: int = 0) -> TextIO:
     """
     Performs filter of input FASTQ file according to input parameters. 
@@ -97,17 +165,24 @@ def run_fastq_filter(input_path: Optional[str] = None, output_filename: Optional
     Output:
     Returns FASTQ only with filtered reads which satisfied all input/default conditions.
     """
+
+    "Specify input path"
     if not input_path.endswith('.fastq'):
-        raise ValueError('Incorrect input file extension, should be .fastq')           
+        raise ValueError('Incorrect input file extension, should be .fastq')   
+
+    "Specify output path"
+    output_path = 'fastq_filtrator_resuls'
+    if not os.path.exists(output_path):
+        os.makedirs(output_path)
     if output_filename is None:
-        output_filename = os.path.basename(input_path)        
+        output_filename = os.path.basename(input_path)
+    "Passed the parameters"
     gc_params = int_to_tuple(gc_bounds)
-    len_bound_params = int_to_tuple(length_bounds)       
-    fastq_dictionary = fastq_to_dict(input_path)
-    filtered_fastq = {}   
-    for read in fastq_dictionary:
-        read_sequence = fastq_dictionary[read][0]
-        read_quality = fastq_dictionary[read][2]
-        if check_gc(read_sequence, gc_params) and check_length(read_sequence, len_bound_params) and check_quality(read_quality, quality_threshold):
-            filtered_fastq[read] = fastq_dictionary[read][:]        
-    return dict_to_fastq(filtered_fastq, output_filename)
+    len_bound_params = int_to_tuple(length_bounds)    
+    "Filter and record results"
+    filtererd_fastq = open(os.path.join(output_path, output_filename), mode='w')
+    for seq_record in SeqIO.parse(input_path, "fastq"):
+        if check_gc(seq_record.seq, gc_params) and check_length(seq_record.seq, len_bound_params) and check_quality(seq_record, quality_threshold):
+                SeqIO.write(seq_record, filtererd_fastq, "fastq")  
+    filtererd_fastq.close()   
+    return filtererd_fastq
