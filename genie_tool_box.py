@@ -3,16 +3,6 @@ import re
 from typing import TextIO, Optional, Union
 from abc import ABC, abstractmethod
 from Bio import SeqIO, SeqUtils
-from modules.protein_tools import count_protein_mass, count_trypsin_sites, count_seq_length, classify_aminoacids, check_unusual_aminoacids, count_charge,count_aliphatic_index, is_protein
-
-OPERATIONS = {'count_protein_mass':count_protein_mass,
-             'count_aliphatic_index': count_aliphatic_index,
-             'count_trypsin_sites': count_trypsin_sites,
-             'count_seq_length': count_seq_length,
-             'classify_aminoacids': classify_aminoacids,
-             'check_unusual_aminoacids': check_unusual_aminoacids,
-             'count_charge': count_charge}
-
 
 class BiologicalSequence(ABC):
     @abstractmethod
@@ -112,46 +102,6 @@ class RNASequence(NucleicAcidSequence):
         super().__init__(seq = seq)
 
 
-
-def run_protein_tools(*peptides: str, operation = None) -> dict:
-    """
-    'run_protein_tools' function take the protein sequences and the name of the procedure that the user gives and applies this procedure by one of the available functions
-    to all the given sequences.
-    Calculates protein phisical properties: mass, charge, length, aliphatic index;
-    as well as defines biological features: aminoacid composition, trypsin cleavable sites.
-    
-    Input: a list of protein sequences and one procedure that should be done with these sequences (str type, several values).
-
-    Valid operations: 
-    Protein_tools include several operations:
-    - count_seq_length: returns length of protein (int);
-    - classify_aminoacids: returns collection of classified aminoacids, included in the protein (dict);
-    - check_unusual_aminoacids: informs about whether the unusual aminoacis include into the protein (str);
-    - count_charge: returns charge value of protein (int);
-    - count_protein_mass: calculates mass of all aminoacids of input peptide in g/mol scale (float);
-    - count_aliphatic_index: calculates relative proportion of aliphatic aminoacids in input peptide (float);
-    - count_trypsin_sites: counts number of valid trypsin cleavable sites.
-    
-    Output: a dictionary of input sequence as a key, and outputs from the chosen procedure as a value.
-    Also this function check the availabilaty of the procedure and raise the ValueError when the procedure is not in the list of available
-    functions (see 'OPERATIONS' global variable).
-    """
-    operation_result = {}
-    for peptide in peptides:
-        if not is_protein(peptide):
-            raise ValueError("One of these sequences is not protein sequence or does not match the rools of input. Please select another sequence.")
-        else:
-            if operation in OPERATIONS:
-                result = OPERATIONS[operation](peptide)
-                operation_result.update({peptide: result})
-            else:
-                raise ValueError("This procedure is not available. Please choose another procedure.")
-    return operation_result
-
-
-
-#FASTQ Filtraror with BIOPYTHON utilities
-
 def check_gc(fastq_read: str, gc_params: tuple) -> bool:
     """
     Filters sequences in FASTQ file by GC percentage. 
@@ -219,6 +169,7 @@ def int_to_tuple(input_parameters) -> tuple:
 
 def run_fastq_filter(input_path: Optional[str] = None, output_filename: Optional[str] = None, gc_bounds: Union[int, tuple] = (0, 100), length_bounds: Union[int, tuple] = (0, 2**32), quality_threshold: int = 0) -> TextIO:
     """
+    FASTQ Filtraror with BIOPYTHON utilities
     Performs filter of input FASTQ file according to input parameters. 
     Input will be filtered by: 
         - GC content (gc_bounds);
